@@ -60,14 +60,14 @@
   \begin{exampleblock}{Qu'est-ce que c'est ?}
     \begin{enumerate}
       \pause \item Une application qui semble avoir été développée pour la langue natale de l'utilisateur
-      \pause \item Toutes les intéractions avec l'utilisateur sont faites dans sa langue
+      \pause \item Toutes les interactions avec l'utilisateur sont faites dans sa langue
     \end{enumerate}
   \end{exampleblock}
     \pause
   \begin{alertblock}{Quand ?}
     \begin{enumerate}
       \pause \item C'est important de se poser la question
-      \pause \item Faut-il une même application traduite, ou plusieurs installations de l'application pour chaque langue
+      \pause \item Faut-il une même application traduite ? ou plusieurs installations de l'application pour chaque langue ?
       \pause \item Les contenus seront-il absolument identiques dans toutes les langues ?
     \end{enumerate}
   \end{alertblock}
@@ -106,7 +106,7 @@ def ma_super_vue(request):
 
 \begin{enumerate}
   \item À certains endroits, le code est exécuté au lancement de l'application.
-  \pause \item À ce moment, on ne connait pas encore la langue de l'utilisateur
+  \pause \item À ce moment, on ne connaît pas encore la langue de l'utilisateur
   \pause \item On utilise alors \texttt{ugettext\_lazy} afin que le texte soit remplacé non pas à l'exécution, mais à l'affichage.
 \end{enumerate}
 \pause
@@ -197,11 +197,14 @@ On utilise \texttt{python manage.py compilemessages} pour compiler le \texttt{dj
 \pause
 
   \begin{lstlisting}
-from django.utils.translation import ungettext
+from django.utils.translation import ungettext, ugettext
 
 page = ungettext('there is %(count)d object',
                  'there are %(count)d objects',
                  count) % {'count': count}
+
+ugettext('mon texte et la variable %s' % variable)
+ugettext('mon texte et la variable %s') % variable
   \end{lstlisting}
 
 \end{frame}
@@ -213,7 +216,7 @@ page = ungettext('there is %(count)d object',
 
   \begin{alertblock}{Traduire les URLs}
       \begin{enumerate}
-         \pause \item Si vous n'en voyez pas l'intérêt ne le faite pas
+         \pause \item Si vous n'en voyez pas l'intérêt ne le faites pas
          \pause \item Il faut s'assurer que deux urls ne se chevauchent pas
       \end{enumerate}
   \end{alertblock}
@@ -252,14 +255,18 @@ urlpatterns += i18n_patterns('',
 
 \section{Outils de gestion du multilingue}
 
-\begin{frame}[fragile]
+\begin{frame}
   \frametitle{Des outils de selection de la langue et des urls}
   \begin{enumerate}
     \item Des middlewares de selection automatique de la langue (Prefix / Utilisateur / Session / Navigateur / Defaut...)
     \pause \item Des templatetags utiles \pause \texttt{\{\% current\_page "fr" \%\}}
     \pause \item \texttt{pip install django-i18nurl}
   \end{enumerate}
-\pause
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Des outils de selection de la langue et des urls}
 
   \begin{lstlisting}
 INSTALLED_APPS = (..., 'i18nurl', ...)
@@ -281,7 +288,7 @@ MIDDLEWARE_CLASSES = (
 \end{frame}
 
 \begin{frame}[fragile]
-  \frametitle{Selecteur de la langue}
+  \frametitle{Sélecteur de la langue}
   \begin{enumerate}
     \item \texttt{\{\% get\_available\_languages as LANGUAGES \%\}}
     \pause \item \texttt{\{\% for lang\_code, lang\_name in LANGUAGES \%\}}
@@ -300,7 +307,7 @@ MIDDLEWARE_CLASSES = (
     \item Plusieurs solutions
     \pause \item \textbf{django-nani} Avec une table pour stocker les traductions
     \pause \item \textbf{django-modeltranslation} Avec un champ par langue
-    \pause \item On ajoute pas des langues sans modifier le code
+    \pause \item On n'ajoute pas des langues sans modifier le code
     \pause \item \textbf{django-modeltranslation} avec \textbf{South} c'est cool
   \end{enumerate}
 \pause
@@ -325,7 +332,7 @@ translator.register(Category, CategoryTranslationOptions)
   \vspace{-0.7em}
   \begin{enumerate}
     \item Même sans le multilingue il faut bien gérer ses mails
-    \pause \item Avec le multilingue, on peut avoir des images qui change
+    \pause \item Avec le multilingue, on peut avoir des images qui changent
     \pause \item \textbf{django-mail-factory} est une bonne solution
     \pause \item On écrit ses mails dans les templates
     \pause \item On a un chemin permettant de faire un template spécifique dans une langue
@@ -351,7 +358,7 @@ factory.register(WelcomeEmail)
   \frametitle{Conclusion}
 
   \begin{enumerate}
-     \item Django possède des outils (Internationnalisation, Localisation, Timezone)
+     \item Django possède des outils (Internationalisation, Localisation, Timezone)
      \pause \item Novapost a développé des outils (\textbf{check\_po}, \textbf{django-i18nurl}, \textbf{django-mail-factory})
      \pause \item Faire une application complètement multilingue qui semble native \pause \textbf{C'EST POSSIBLE}
      \pause \item Pour les CMS, faites juste des catégories liées à une langue et le contenu interne dans une seule langue.
@@ -359,6 +366,14 @@ factory.register(WelcomeEmail)
 
 \end{frame}
 
-
+\begin{frame}
+  \frametitle{Questions ?}
+  \vfill
+  \Large\centerline{Merci pour votre attention}
+  \pause
+  \Large\centerline{Avez vous des questions ?}
+  \vfill
+  \image{django.png}{0.6}
+\end{frame}
 
 \end{document}
