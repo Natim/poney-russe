@@ -13,7 +13,7 @@
 \usecolortheme{Terra}
 \usepackage{upgreek}
 
-\title[Un poney qui parle le Russe]{Apprenez le Russe à votre Poney}
+\title[Un poney qui parle le russe]{Apprenez le russe à votre poney}
 \subtitle{Novapost - Automne \the\year}
 \author{Rémy HUBSCHER}
 \institute{remy.hubscher@novapost.fr}
@@ -23,7 +23,7 @@
 \hypersetup{
       pdfpagemode = FullScreen,% afficher le pdf en plein écran
       pdfauthor   = {Rémy HUBSCHER},%
-      pdftitle    = {Apprenez le Russe à votre Poney},%
+      pdftitle    = {Apprenez le russe à votre poney},%
       pdfsubject  = {NOVAPOST - Les applications multilingues},%
       pdfkeywords = {novapost, i18n, l10n, django},%
       pdfcreator  = {PDFLaTeX},%
@@ -67,7 +67,7 @@
   \begin{alertblock}{Quand ?}
     \begin{enumerate}
       \pause \item C'est important de se poser la question
-      \pause \item Faut-il une même application traduite ? ou plusieurs installations de l'application pour chaque langue ?
+      \pause \item Faut-il une même application traduite ? ou une installation de l'application pour chaque langue ?
       \pause \item Les contenus seront-il absolument identiques dans toutes les langues ?
     \end{enumerate}
   \end{alertblock}
@@ -158,9 +158,9 @@ LANGUAGES = (
 \end{frame}
 
 \begin{frame}[fragile]
-  \begin{exampleblock}{Récupérer les chaines à traduire}
+  \begin{exampleblock}{Récupérer les textes à traduire}
     \begin{enumerate}
-      \pause \item La commande \texttt{makemessages} permet de récupérer les chaines à traduire
+      \pause \item La commande \texttt{makemessages} permet de récupérer les textes à traduire
       \pause \item On créé un répertoire \texttt{locale} pour le projet ou pour l'app
       \pause \item \texttt{python manage.py makemessages -l fr --no-location}
       \pause \item \texttt{\$EDITOR locale/fr/LC\_MESSAGES/django.po}
@@ -209,34 +209,36 @@ ugettext('mon texte et la variable %s') % variable
 
 \end{frame}
 
-\section{Traduction des urls}
+\section{Traduction des URL}
 
 \begin{frame}[fragile]
-  \frametitle{Traduire les URLs}
-
-  \begin{alertblock}{Traduire les URLs}
+  \frametitle{Traduire les URL}
+  \vspace{-0.7em}
+  \begin{alertblock}{Traduire les URL}
       \begin{enumerate}
          \pause \item Si vous n'en voyez pas l'intérêt ne le faites pas
-         \pause \item Il faut s'assurer que deux urls ne se chevauchent pas
+         \pause \item Il faut s'assurer que deux URL ne se chevauchent pas
       \end{enumerate}
   \end{alertblock}
 \pause
 
   \begin{lstlisting}
 from django.conf.urls import patterns, include, url
-from django.conf.urls.i18n import i18n_patterns
 from django.utils.translation import ugettext_lazy as _
-urlpatterns = patterns(''
-    url(r'^sitemap\.xml$', 'sitemap.view'))
 category_patterns = patterns(''
     url(r'^$', 'category.views.list'),
     url(r'^(?P<slug>[\w-]+)/$', 'category.views.detail'))
-urlpatterns += i18n_patterns('',
+ihm_parrterns = patterns('',
     url(_(r'^about/$'), 'about.view'),
 
     url(_(r'^categories/'), include(category_patterns,
         namespace='category')))
+urlpatterns = patterns('',
+    url(r'^sitemap\.xml$', 'sitemap.view'),
+    url(_(r'^en/'), include(ihm_patterns)),)
   \end{lstlisting}
+\pause
+Traduire \texttt{\textasciicircum en/} avec le code de langue dans chaque langue.
 
 \end{frame}
 
@@ -248,7 +250,7 @@ urlpatterns += i18n_patterns('',
     \item On souhaite vérifier s'il y a des phrases non traduites
     \pause \item \texttt{pip install check\_po}
     \pause \item \texttt{check\_po locale/fr/LC\_MESSAGES/django.po}
-    \pause \item On souhaite vérifier que toutes les URLs sont bien uniques
+    \pause \item On souhaite vérifier que toutes les URL sont bien uniques
     \pause \item \texttt{check\_urls locale/fr/LC\_MESSAGES/django.po}
   \end{enumerate}
 \end{frame}
@@ -256,34 +258,12 @@ urlpatterns += i18n_patterns('',
 \section{Outils de gestion du multilingue}
 
 \begin{frame}
-  \frametitle{Des outils de selection de la langue et des urls}
+  \frametitle{Des outils de sélection de la langue et des url}
   \begin{enumerate}
-    \item Des middlewares de selection automatique de la langue (Prefix / Utilisateur / Session / Navigateur / Defaut...)
+    \item Des middlewares de sélection automatique de la langue (Préfixe / Utilisateur / Session / Navigateur / Défaut...)
     \pause \item Des templatetags utiles \pause \texttt{\{\% current\_page "fr" \%\}}
     \pause \item \texttt{pip install django-i18nurl}
   \end{enumerate}
-
-\end{frame}
-
-\begin{frame}[fragile]
-  \frametitle{Des outils de selection de la langue et des urls}
-
-  \begin{lstlisting}
-INSTALLED_APPS = (..., 'i18nurl', ...)
-MIDDLEWARE_CLASSES = (
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'i18nurl.middleware.UrlPrefixLanguageMiddleware',
-    'i18nurl.middleware.UserLanguageMiddleware',
-    'i18nurl.middleware.SessionLanguageMiddleware',
-    'i18nurl.middleware.CookieLanguageMiddleware',
-    'i18nurl.middleware.HttpAcceptLanguageMiddleware',
-    'i18nurl.middleware.DefaultLanguageMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    ...
-)
-  \end{lstlisting}
 
 \end{frame}
 
