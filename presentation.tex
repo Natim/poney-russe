@@ -1,0 +1,364 @@
+%\documentclass[trans]{beamer}
+\documentclass{beamer}
+
+\usepackage{natim-beamer}
+\usepackage{listings}
+
+\usetheme[shownavigation={true},  % true | false
+          logo={images/novapost.png},
+          titlepageimage={images/titleimage.png},
+          header=utbm,          % fullnav | shortnav | utbm
+          dept={Recherche \& Dévelopment}
+        ]{UTBM}
+\usecolortheme{Terra}
+\usepackage{upgreek}
+
+\title[Un poney qui parle le Russe]{Apprenez le Russe à votre Poney}
+\subtitle{Novapost - Automne \the\year}
+\author{Rémy HUBSCHER}
+\institute{remy.hubscher@novapost.fr}
+\date{\today}
+
+
+\hypersetup{
+      pdfpagemode = FullScreen,% afficher le pdf en plein écran
+      pdfauthor   = {Rémy HUBSCHER},%
+      pdftitle    = {Apprenez le Russe à votre Poney},%
+      pdfsubject  = {NOVAPOST - Les applications multilingues},%
+      pdfkeywords = {novapost, i18n, l10n, django},%
+      pdfcreator  = {PDFLaTeX},%
+      pdfproducer = {PDFLaTeX}%
+}
+
+\begin{document}
+\lstset{language=python,showstringspaces=false,breaklines=true,xleftmargin=7mm,basicstyle=\scriptsize,frame=single,framexleftmargin=7mm,captionpos=b,tabsize=2,numbers=left,numberstyle=\scriptsize,escapechar={\%}{\_}{\^},literate={è}{{\`e}}1 {é}{{\'e}}1 {à}{{\`a}}1 {ñ}{{\~n}}1 {ç}{{\c c}}1 {й}{{selectfontchar233}}1,}
+\selectlanguage{french}
+
+\begin{frame}[plain]
+  \titlepage
+\end{frame}
+
+% \AtBeginSection[]{
+%    \begin{frame}
+%      \frametitle{Sommaire}
+%      %%% affiche en début de chaque section, les noms de sections et
+%      %%% noms de sous-sections de la section en cours.
+%      \tableofcontents[currentsection,hideothersubsections]
+%    \end{frame} 
+% }
+
+\begin{frame}
+  \frametitle{Sommaire}
+  \tableofcontents[pausesections,hideothersubsections]
+\end{frame}
+
+
+\section{Une application multilingue ?}
+
+\begin{frame}
+  \frametitle{Une application multilingue ?}
+  \begin{exampleblock}{Qu'est-ce que c'est ?}
+    \begin{enumerate}
+      \pause \item Une application qui semble avoir été développée pour la langue natale de l'utilisateur
+      \pause \item Toutes les intéractions avec l'utilisateur sont faites dans sa langue
+    \end{enumerate}
+  \end{exampleblock}
+    \pause
+  \begin{alertblock}{Quand ?}
+    \begin{enumerate}
+      \pause \item C'est important de se poser la question
+      \pause \item Faut-il une même application traduite, ou plusieurs installations de l'application pour chaque langue
+      \pause \item Les contenus seront-il absolument identiques dans toutes les langues ?
+    \end{enumerate}
+  \end{alertblock}
+\end{frame}
+
+\section{Comment traduire le code source ?}
+
+\begin{frame}[fragile]
+  \frametitle{Traduire le code source}
+    \begin{alertblock}{Comment ?}
+    \begin{enumerate}
+      \pause \item Django permet de traduire le contenu avec gettext
+      \pause \item Dans le code Python ainsi que dans les templates
+    \end{enumerate}
+    \end{alertblock}
+    \pause
+    \textbf{Les vues}
+  \begin{lstlisting}
+from django.utils.translation import ugettext as _
+
+def ma_super_vue(request):
+    return HttpResponse(_('Hello'))
+  \end{lstlisting}
+  \pause
+  \textbf{Les templates}
+  \begin{lstlisting}
+{% load i18n %}
+{% trans "Hello" %}
+  \end{lstlisting}
+
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Traduire le code source}
+
+\begin{enumerate}
+  \item À certains endroits, le code est exécuté au lancement de l'application.
+  \pause \item À ce moment, on ne connait pas encore la langue de l'utilisateur
+  \pause \item On utilise alors \texttt{ugettext\_lazy} afin que le texte soit remplacé non pas à l'exécution, mais à l'affichage.
+\end{enumerate}
+\pause
+  \textbf{Les models}
+  \begin{lstlisting}
+from django.utils.translation import ugettext_lazy as _
+
+class Category(models.Model):
+    slug = models.SlugField(_('slug'))
+    name = models.CharField(_('name'), max_length=40)
+    description = models.TextField(_('description'), blank=True)
+
+    class Meta:
+        verbose_name = _('category')
+        verbose_name_plural = _('categories')
+  \end{lstlisting}
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Configurer Django}
+  \begin{block}{Activer le mode multilingue de Django}
+    \pause
+  \begin{lstlisting}
+# -*- coding: utf-8 -*-
+
+# load the internationalization machinery.
+USE_I18N = True
+
+# will not format dates, numbers and calendars according
+# to the current locale.
+USE_L10N = True
+
+# will not use timezone-aware datetimes.
+USE_TZ = True
+
+ugettext = lambda s: s
+LANGUAGES = (
+    ('fr', u'Français'),
+    ('es', u'Español'),
+    ('en', u'English'),
+    ('de', u'Deutch'),
+)
+  \end{lstlisting}
+
+
+  \end{block}
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \begin{exampleblock}{Récupérer les chaines à traduire}
+    \begin{enumerate}
+      \pause \item La commande \texttt{makemessages} permet de récupérer les chaines à traduire
+      \pause \item On créé un répertoire \texttt{locale} pour le projet ou pour l'app
+      \pause \item \texttt{python manage.py makemessages -l fr --no-location}
+      \pause \item \texttt{\$EDITOR locale/fr/LC\_MESSAGES/django.po}
+    \end{enumerate}
+  \end{exampleblock}
+  \pause
+
+  \begin{lstlisting}
+msgid "Hello"
+msgstr "Bonjour"
+  \end{lstlisting}
+
+\pause
+On utilise \texttt{python manage.py compilemessages} pour compiler le \texttt{django.po} en catalogue gettext \texttt{django.mo}
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \begin{alertblock}{Pour aller plus loin}
+    \begin{enumerate}
+      \pause \item La gestion des pluriels
+      \pause \item Le contexte de traduction
+      \pause \item Les variables de substitution
+    \end{enumerate}
+  \end{alertblock}
+  \pause
+
+  \begin{lstlisting}
+{% load i18n %}
+{% blocktrans with article.created_at|date:'DATE_FORMAT' as date and article.created_at|date:'H:i' as time %}
+  Request created the {{ date }} at {{ time }}
+{% endblocktrans %}
+  \end{lstlisting}
+\pause
+
+  \begin{lstlisting}
+from django.utils.translation import ungettext
+
+page = ungettext('there is %(count)d object',
+                 'there are %(count)d objects',
+                 count) % {'count': count}
+  \end{lstlisting}
+
+\end{frame}
+
+\section{Traduction des urls}
+
+\begin{frame}[fragile]
+  \frametitle{Traduire les URLs}
+
+  \begin{alertblock}{Traduire les URLs}
+      \begin{enumerate}
+         \pause \item Si vous n'en voyez pas l'intérêt ne le faite pas
+         \pause \item Il faut s'assurer que deux urls ne se chevauchent pas
+      \end{enumerate}
+  \end{alertblock}
+\pause
+
+  \begin{lstlisting}
+from django.conf.urls import patterns, include, url
+from django.conf.urls.i18n import i18n_patterns
+from django.utils.translation import ugettext_lazy as _
+urlpatterns = patterns(''
+    url(r'^sitemap\.xml$', 'sitemap.view'))
+category_patterns = patterns(''
+    url(r'^$', 'category.views.list'),
+    url(r'^(?P<slug>[\w-]+)/$', 'category.views.detail'))
+urlpatterns += i18n_patterns('',
+    url(_(r'^about/$'), 'about.view'),
+
+    url(_(r'^categories/'), include(category_patterns,
+        namespace='category')))
+  \end{lstlisting}
+
+\end{frame}
+
+\section{Vérifier ses fichiers de traductions}
+\begin{frame}
+  \frametitle{Vérifier ses fichiers de traductions}
+
+  \begin{enumerate}
+    \item On souhaite vérifier s'il y a des phrases non traduites
+    \pause \item \texttt{pip install check\_po}
+    \pause \item \texttt{check\_po locale/fr/LC\_MESSAGES/django.po}
+    \pause \item On souhaite vérifier que toutes les URLs sont bien uniques
+    \pause \item \texttt{check\_urls locale/fr/LC\_MESSAGES/django.po}
+  \end{enumerate}
+\end{frame}
+
+\section{Outils de gestion du multilingue}
+
+\begin{frame}[fragile]
+  \frametitle{Des outils de selection de la langue et des urls}
+  \begin{enumerate}
+    \item Des middlewares de selection automatique de la langue (Prefix / Utilisateur / Session / Navigateur / Defaut...)
+    \pause \item Des templatetags utiles \pause \texttt{\{\% current\_page "fr" \%\}}
+    \pause \item \texttt{pip install django-i18nurl}
+  \end{enumerate}
+\pause
+
+  \begin{lstlisting}
+INSTALLED_APPS = (..., 'i18nurl', ...)
+MIDDLEWARE_CLASSES = (
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'i18nurl.middleware.UrlPrefixLanguageMiddleware',
+    'i18nurl.middleware.UserLanguageMiddleware',
+    'i18nurl.middleware.SessionLanguageMiddleware',
+    'i18nurl.middleware.CookieLanguageMiddleware',
+    'i18nurl.middleware.HttpAcceptLanguageMiddleware',
+    'i18nurl.middleware.DefaultLanguageMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    ...
+)
+  \end{lstlisting}
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Selecteur de la langue}
+  \begin{enumerate}
+    \item \texttt{\{\% get\_available\_languages as LANGUAGES \%\}}
+    \pause \item \texttt{\{\% for lang\_code, lang\_name in LANGUAGES \%\}}
+    \pause \item \texttt{\{\% language lang\_code \%\} \{\% endlanguage \%\}}
+    \pause \item \texttt{\{\% current\_i18nurl lang\_code \%\}}
+  \end{enumerate}
+\pause
+\vfill
+  Exemple complet : \url{https://gist.github.com/Natim/6722268}
+\vfill
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Traduire les models}
+  \begin{enumerate}
+    \item Plusieurs solutions
+    \pause \item \textbf{django-nani} Avec une table pour stocker les traductions
+    \pause \item \textbf{django-modeltranslation} Avec un champ par langue
+    \pause \item On ajoute pas des langues sans modifier le code
+    \pause \item \textbf{django-modeltranslation} avec \textbf{South} c'est cool
+  \end{enumerate}
+\pause
+\textbf{category/translation.py}
+\begin{lstlisting}
+from modeltranslation.translator import translator, TranslationOptions
+from category.models import Category
+
+class CategoryTranslationOptions(TranslationOptions):
+    fields = ('name', 'slug', 'description')
+
+translator.register(Category, CategoryTranslationOptions)
+\end{lstlisting}
+\pause
+\texttt{from modeltranslation.admin import TranslationAdmin}
+\end{frame}
+
+
+
+\begin{frame}[fragile]
+  \frametitle{Gérer les mails}
+  \vspace{-0.7em}
+  \begin{enumerate}
+    \item Même sans le multilingue il faut bien gérer ses mails
+    \pause \item Avec le multilingue, on peut avoir des images qui change
+    \pause \item \textbf{django-mail-factory} est une bonne solution
+    \pause \item On écrit ses mails dans les templates
+    \pause \item On a un chemin permettant de faire un template spécifique dans une langue
+    \pause \item \texttt{/admin/mails} permet de tester ses mails et de les prévisualiser
+    \pause \item On peut mettre des images inline et des pièces jointes
+  \end{enumerate}
+\pause
+\textbf{category/mails.py}
+\begin{lstlisting}
+from mail_factory import factory, BaseMail
+
+class WelcomeEmail(BaseMail):
+    template_name = 'activation_email'
+    params = ['user', 'site_name', 'site_url']
+
+factory.register(WelcomeEmail)
+\end{lstlisting}
+\end{frame}
+
+
+
+\begin{frame}
+  \frametitle{Conclusion}
+
+  \begin{enumerate}
+     \item Django possède des outils (Internationnalisation, Localisation, Timezone)
+     \pause \item Novapost a développé des outils (\textbf{check\_po}, \textbf{django-i18nurl}, \textbf{django-mail-factory})
+     \pause \item Faire une application complètement multilingue qui semble native \pause \textbf{C'EST POSSIBLE}
+     \pause \item Pour les CMS, faites juste des catégories liées à une langue et le contenu interne dans une seule langue.
+  \end{enumerate}
+
+\end{frame}
+
+
+
+\end{document}
